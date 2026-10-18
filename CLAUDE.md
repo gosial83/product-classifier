@@ -5,7 +5,17 @@ Aplikacja konsolowa .NET 8 do klasyfikacji produktów (obecnie: kosmetyki do pie
 ## Cel
 
 - **Obecny etap:** wczytanie pliku CSV (`sku`, `nazwa`, `opis`, `producent`) do listy obiektów `Product`, wypisanie liczby rekordów i pierwszych trzech oraz ostrzeżenie o rekordach z brakującymi danymi.
-- **Docelowo:** klasyfikacja produktów przez API modelu językowego z użyciem **tool callingu**. Model będzie wywoływał narzędzia zdefiniowane w aplikacji (np. przypisanie kategorii, zgłoszenie brakujących danych), a aplikacja zwaliduje i zapisze wynik. Rekordy niekompletne (pusty opis lub producent) są w danych celowo, bo klasyfikator musi je obsłużyć świadomie, a nie po cichu.
+- **Docelowo:** klasyfikacja produktów przez API modelu językowego z użyciem **tool callingu**. Zakres tej wersji:
+  - **Wejście modelu:** `nazwa`, `opis`, `producent` jednego produktu. Pola puste przekazujemy jawnie jako brak, nie pomijamy ich.
+  - **Wyjście modelu:** wywołanie **jednego** narzędzia, które zwraca:
+    - `kategoria`, wyłącznie z zamkniętej listy: `olejek`, `balsam`, `szampon`, `wosk`, `inne`;
+    - `pewnosc`: `wysoka`, `srednia` albo `niska`;
+    - `uzasadnienie`: jedno zdanie.
+  - Aplikacja waliduje odpowiedź (wartości spoza list albo brak pola to błąd, nie wynik) i dopiero wtedy ją zapisuje.
+  - **Zasada nadrzędna:** model nigdy nie uzupełnia informacji, których nie ma w danych wejściowych (np. nie zgaduje producenta ani nie dopowiada składu). Przy niepewności zwraca pewność `niska`, a aplikacja oznacza taki rekord do weryfikacji ręcznej, zamiast traktować wynik jako pewny.
+  - **Poza zakresem tej wersji (świadomie):** ekstrakcja dodatkowych atrybutów (np. pojemność, zapach, składniki, przeznaczenie). Nie rozszerzaj narzędzia o takie pola bez osobnej decyzji.
+
+  Rekordy niekompletne (pusty opis lub producent) są w danych celowo, bo klasyfikator musi je obsłużyć świadomie, a nie po cichu.
 
 ## Struktura katalogów
 
