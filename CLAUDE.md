@@ -1,6 +1,6 @@
 # ProductClassifier
 
-Aplikacja konsolowa .NET 8 do klasyfikacji produktów (obecnie: kosmetyki do pielęgnacji brody) na podstawie danych z pliku CSV. Projekt portfolio do CV.
+Aplikacja konsolowa .NET 8 do klasyfikacji produktów (obecnie: kosmetyki do pielęgnacji brody) na podstawie danych z pliku CSV. Projekt demonstracyjny: klasyfikacja danych produktowych z użyciem LLM.
 
 ## Cel
 
