@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Anthropic" Version="12.58.0" />
     <PackageReference Include="CsvHelper" Version="33.1.0" />
   </ItemGroup>
 
