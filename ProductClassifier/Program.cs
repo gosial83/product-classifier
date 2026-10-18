@@ -65,7 +65,8 @@ Console.WriteLine($"Klasyfikacja ({ClaudeProductClassifier.ModelId})");
 Console.WriteLine();
 
 var classifier = new ClaudeProductClassifier(new AnthropicClient());
-var doWeryfikacji = new List<ClassifiedProduct>();
+var przyjete = new List<ClassifiedProduct>();
+var doWeryfikacji = new List<ReviewItem>();
 var bledy = new List<string>();
 
 foreach (var p in products)
@@ -82,24 +83,30 @@ foreach (var p in products)
         if (wynik.DoWeryfikacji)
         {
             Console.WriteLine($"  -> weryfikacja ręczna ({wynik.Powod})");
-            doWeryfikacji.Add(wynik);
+            doWeryfikacji.Add(ReviewItem.FromClassified(wynik));
+        }
+        else
+        {
+            przyjete.Add(wynik);
         }
     }
     catch (ClassificationException ex)
     {
         Console.WriteLine($"  BŁĄD: {ex.Message}");
+        doWeryfikacji.Add(ReviewItem.FromError(p, ex.Message));
         bledy.Add(p.Sku);
     }
     catch (Exception ex)
     {
         Console.WriteLine($"  BŁĄD wywołania API: {ex.Message}");
+        doWeryfikacji.Add(ReviewItem.FromError(p, ex.Message));
         bledy.Add(p.Sku);
     }
 
     Console.WriteLine();
 }
 
-Console.WriteLine($"Sklasyfikowano: {products.Count - bledy.Count} z {products.Count}");
+Console.WriteLine($"Przyjęte bez zastrzeżeń: {przyjete.Count} z {products.Count}");
 
 if (doWeryfikacji.Count > 0)
 {
@@ -110,10 +117,20 @@ if (doWeryfikacji.Count > 0)
     }
 }
 
-if (bledy.Count > 0)
+var csvWriter = new ClassificationCsvWriter(path, Directory.GetCurrentDirectory());
+try
 {
-    Console.WriteLine($"Nieudane: {bledy.Count} ({string.Join(", ", bledy)})");
-    return 4;
+    csvWriter.Write(przyjete, doWeryfikacji);
+}
+catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+{
+    Console.Error.WriteLine($"Nie udało się zapisać wyników: {ex.Message}");
+    return 5;
 }
 
-return 0;
+Console.WriteLine();
+Console.WriteLine("Zapisano:");
+Console.WriteLine($"  {csvWriter.SklasyfikowanePath} ({przyjete.Count})");
+Console.WriteLine($"  {csvWriter.DoWeryfikacjiPath} ({doWeryfikacji.Count})");
+
+return bledy.Count > 0 ? 4 : 0;
